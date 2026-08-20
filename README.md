@@ -1,16 +1,41 @@
-# React + Vite
+# ProofPass
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ProofPass is a privacy-preserving Web2 account verification application built with Primus zkTLS.
 
-Currently, two official plugins are available:
+It allows a user to prove ownership of a Spotify account without exposing unnecessary account information.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## How It Works
 
-## React Compiler
+1. User clicks "Verify Spotify Account".
+2. The frontend creates a Primus zkTLS attestation request.
+3. The request is sent to the ProofPass backend.
+4. The backend signs the request securely.
+5. Primus performs the attestation.
+6. The resulting proof is displayed in ProofPass.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+- React
+- Vite
+- Node.js
+- Express
+- Primus zkTLS
+- Vercel
+- Render
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Architecture
+
+```text
+User
+  ↓
+React / Vite Frontend
+  ↓
+Primus zkTLS Request
+  ↓
+ProofPass Backend
+  ↓
+Primus Attestation
+  ↓
+Spotify Verification
+  ↓
+Verified Proof
