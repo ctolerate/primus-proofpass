@@ -35,7 +35,6 @@ function App() {
 
       const requestJson = request.toJsonString();
 
-      // IMPORTANT: We need this for debugging
       console.log("========== ATTESTATION REQUEST ==========");
       console.log(requestJson);
       console.log("=========================================");
@@ -56,7 +55,6 @@ function App() {
         }
       );
 
-      // Try to read response safely
       const responseText = await response.text();
 
       console.log("Backend status:", response.status);
@@ -141,8 +139,13 @@ function App() {
     <div className="app">
       <div className="container">
 
+        {/* Primus Logo */}
         <div className="logo">
-          ◈ primus
+          <img
+            src="/HycTNMwZ_400x400.png"
+            alt="Primus"
+          />
+          <span>primus</span>
         </div>
 
         <h1>ProofPass</h1>
