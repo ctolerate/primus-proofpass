@@ -14,16 +14,19 @@ function App() {
     try {
       setLoading(true);
       setProof(null);
+
+      // 1. Initialize Primus
       setStatus("Initializing Primus...");
 
       const primusZKTLS = new PrimusZKTLS();
 
       await primusZKTLS.init(APP_ID);
 
+      // 2. Create attestation request
       setStatus("Creating attestation request...");
 
       const userAddress =
-        "0x0000000000000000000000000000000000000000";
+        "0x7ab44DE0156925fe0c24482a2cDe48C465e47573";
 
       const request = primusZKTLS.generateRequestParams(
         TEMPLATE_ID,
@@ -32,12 +35,16 @@ function App() {
 
       const requestJson = request.toJsonString();
 
-      console.log("Attestation request:", requestJson);
+      // IMPORTANT: We need this for debugging
+      console.log("========== ATTESTATION REQUEST ==========");
+      console.log(requestJson);
+      console.log("=========================================");
 
+      // 3. Send request to backend
       setStatus("Sending request to ProofPass server...");
 
       const response = await fetch(
-        "http://localhost:3001/api/sign",
+        "https://primus-proofpass.onrender.com/api/sign",
         {
           method: "POST",
           headers: {
@@ -49,7 +56,21 @@ function App() {
         }
       );
 
-      const data = await response.json();
+      // Try to read response safely
+      const responseText = await response.text();
+
+      console.log("Backend status:", response.status);
+      console.log("Backend response:", responseText);
+
+      let data;
+
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        throw new Error(
+          `Backend returned ${response.status}: ${responseText}`
+        );
+      }
 
       if (!response.ok) {
         throw new Error(
@@ -57,8 +78,17 @@ function App() {
         );
       }
 
-      console.log("Signed request:", data.signedRequest);
+      if (!data.signedRequest) {
+        throw new Error(
+          "Backend did not return a signed request."
+        );
+      }
 
+      console.log("========== SIGNED REQUEST ==========");
+      console.log(data.signedRequest);
+      console.log("====================================");
+
+      // 4. Start Primus attestation
       setStatus("Waiting for Spotify verification...");
 
       const attestation =
@@ -66,12 +96,17 @@ function App() {
           data.signedRequest
         );
 
-      console.log("Attestation:", attestation);
+      console.log("========== ATTESTATION ==========");
+      console.log(attestation);
+      console.log("=================================");
 
+      // 5. Show proof
       setProof(attestation);
       setStatus("Proof generated successfully!");
     } catch (error) {
-      console.error("Primus error:", error);
+      console.error("========== PRIMUS ERROR ==========");
+      console.error(error);
+      console.error("==================================");
 
       setStatus(
         `Error: ${error?.message || String(error)}`
@@ -82,7 +117,9 @@ function App() {
   }
 
   function getProofValue(key) {
-    if (!proof) return "—";
+    if (!proof) {
+      return "—";
+    }
 
     if (proof.data) {
       try {
@@ -104,7 +141,9 @@ function App() {
     <div className="app">
       <div className="container">
 
-        <div className="logo">◈ primus</div>
+        <div className="logo">
+          ◈ primus
+        </div>
 
         <h1>ProofPass</h1>
 
@@ -122,7 +161,8 @@ function App() {
 
           <p>
             Prove that you control a Spotify account
-            without exposing unnecessary account information.
+            without exposing unnecessary account
+            information.
           </p>
 
           <button
@@ -148,11 +188,14 @@ function App() {
               ✓ VERIFIED
             </div>
 
-            <h2>Spotify Account Ownership</h2>
+            <h2>
+              Spotify Account Ownership
+            </h2>
 
             <p className="verification-text">
               Primus successfully generated a
-              zkTLS attestation for this Spotify account.
+              zkTLS attestation for this Spotify
+              account.
             </p>
 
             <div className="proof-grid">
@@ -173,24 +216,31 @@ function App() {
 
               <div className="proof-item">
                 <span>Source</span>
-                <strong>Spotify</strong>
+                <strong>
+                  Spotify
+                </strong>
               </div>
 
               <div className="proof-item">
                 <span>Method</span>
-                <strong>Primus zkTLS</strong>
+                <strong>
+                  Primus zkTLS
+                </strong>
               </div>
 
               <div className="proof-item">
                 <span>Attestor</span>
                 <strong>
-                  {proof.attestors?.[0]?.url || "Primus Labs"}
+                  {proof.attestors?.[0]?.url ||
+                    "Primus Labs"}
                 </strong>
               </div>
 
               <div className="proof-item">
                 <span>Verified Fields</span>
-                <strong>2</strong>
+                <strong>
+                  2
+                </strong>
               </div>
 
             </div>
@@ -201,7 +251,11 @@ function App() {
               </summary>
 
               <pre>
-                {JSON.stringify(proof, null, 2)}
+                {JSON.stringify(
+                  proof,
+                  null,
+                  2
+                )}
               </pre>
             </details>
 
