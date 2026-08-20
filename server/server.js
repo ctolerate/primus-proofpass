@@ -45,6 +45,12 @@ app.post("/api/sign", async (req, res) => {
   }
 });
 
-app.listen(3001, () => {
-  console.log("ProofPass backend running on http://localhost:3001");
+app.get("/healthz", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`ProofPass backend running on port ${PORT}`);
 });
